@@ -113,15 +113,16 @@
         function sendToGoogleSheet(barcode, type, timestamp) {
             showStatus("Syncing to Google Sheets...", "#e8f0fe", "#1967d2");
             
-            let formData = new FormData();
-            formData.append("barcode", barcode);
-            formData.append("type", type);
-            formData.append("timestamp", timestamp);
+            // This format (URLSearchParams) is 100% reliable for Google Apps Script
+            const urlParams = new URLSearchParams();
+            urlParams.append("barcode", barcode);
+            urlParams.append("type", type);
+            urlParams.append("timestamp", timestamp);
 
             fetch(GOOGLE_WEB_APP_URL, {
                 method: "POST",
-                body: formData,
-                mode: "no-cors" // Crucial for bypassing CORS on static sites
+                body: urlParams,
+                mode: "no-cors" 
             }).then(() => {
                 showStatus("✅ Saved to Google Sheet!", "#e6f4ea", "#137333");
                 setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 3000);
