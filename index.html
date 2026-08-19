@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Scanner V3</title>
+    <title>Warehouse Scanner V4</title>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -11,12 +11,12 @@
         .container { max-width: 500px; margin: 0 auto; }
         h2 { color: #1a1a1a; margin-top: 5px; }
         
-        /* Warehouse Dropdown Styles */
+        /* Warehouse Dropdown */
         .warehouse-selector { margin-bottom: 15px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: left; }
         .warehouse-selector label { font-weight: bold; color: #333; display: block; margin-bottom: 8px; font-size: 14px; }
         .select-box { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 16px; background-color: #f8f9fa; color: #1a1a1a; font-weight: bold; }
         
-        /* Inward/Outward Toggle Styles */
+        /* Inward/Outward Toggle */
         .type-selector { display: flex; justify-content: space-between; margin-bottom: 15px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .type-selector label { flex: 1; padding: 10px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; border: 2px solid transparent; }
         .type-selector input[type="radio"] { display: none; }
@@ -25,28 +25,35 @@
         input[value="Outward"]:checked + span { background: #fce8e6; color: #c5221f; border: 2px solid #c5221f; display: block; padding: 10px; border-radius: 8px; }
         span.radio-btn { display: block; padding: 10px; border-radius: 8px; background: #f8f9fa; color: #5f6368; border: 2px solid #dadce0; }
 
-        #reader { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        #reader { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
         
-        .btn { background: #107c41; color: white; padding: 16px 20px; border: none; border-radius: 8px; font-size: 18px; width: 100%; margin-top: 20px; cursor: pointer; font-weight: bold; }
+        /* Manual Entry Styles */
+        .manual-entry { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; display: flex; gap: 10px; align-items: center; }
+        .manual-input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 16px; }
+        .manual-btn { background: #1a73e8; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .manual-btn:active { background: #1557b0; }
+
+        .btn { background: #107c41; color: white; padding: 16px 20px; border: none; border-radius: 8px; font-size: 18px; width: 100%; margin-bottom: 10px; cursor: pointer; font-weight: bold; }
         .btn:disabled { background: #cccccc; cursor: not-allowed; }
         
-        .status-banner { margin-top: 15px; padding: 10px; border-radius: 8px; font-weight: bold; display: none; }
+        .status-banner { margin-top: 5px; margin-bottom: 15px; padding: 10px; border-radius: 8px; font-weight: bold; display: none; }
         
         ul { list-style: none; padding: 0; margin: 15px 0; text-align: left; background: white; border-radius: 12px; max-height: 300px; overflow-y: auto; }
         li { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; display: flex; flex-direction: column; }
         .barcode-text { font-size: 16px; font-weight: bold; color: #333; margin-top: 4px; }
         .time-text { font-size: 12px; color: #888; margin-top: 4px; }
         
-        .badges-container { display: flex; gap: 8px; margin-bottom: 4px; }
+        .badges-container { display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
         .type-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; width: fit-content; }
         .loc-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #e8eaed; color: #3c4043; width: fit-content; }
+        .manual-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #fef08a; color: #854d0e; width: fit-content; }
         .type-inward { background: #e6f4ea; color: #137333; }
         .type-outward { background: #fce8e6; color: #c5221f; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📦 Warehouse Scanner V3</h2>
+        <h2>📦 Warehouse Scanner V4</h2>
         
         <!-- WAREHOUSE SELECTION -->
         <div class="warehouse-selector">
@@ -73,7 +80,14 @@
             </label>
         </div>
 
+        <!-- CAMERA SCANNER -->
         <div id="reader"></div>
+        
+        <!-- MANUAL ENTRY -->
+        <div class="manual-entry">
+            <input type="text" id="manualBarcode" class="manual-input" placeholder="Enter barcode manually..." />
+            <button class="manual-btn" onclick="submitManualEntry()">Add</button>
+        </div>
         
         <div id="syncStatus" class="status-banner"></div>
         
@@ -88,12 +102,13 @@
         /* ==========================================
            PASTE YOUR GOOGLE SHEET WEB APP URL BELOW
            ========================================== */
-        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRErVy_ezJMtHvAYGxYHQQmqHG3IFZKAI3KQNRyQvn2egg_n24SFk-kSEQYW_aNU6t/exec";
+const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRErVy_ezJMtHvAYGxYHQQmqHG3IFZKAI3KQNRyQvn2egg_n24SFk-kSEQYW_aNU6t/exec";
         /* ========================================== */
 
         let scannedItems = [];
         
-        function onScanSuccess(decodedText, decodedResult) {
+        // This function handles BOTH camera scans and manual entry
+        function processBarcode(decodedText, isManual = false) {
             if(!scannedItems.find(item => item.Barcode === decodedText)) {
                 
                 try { new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play(); } catch(e) {}
@@ -103,15 +118,18 @@
                 let location = document.getElementById("warehouse").value;
                 
                 // Add to local list
-                scannedItems.unshift({ Timestamp: timestamp, Barcode: decodedText, Type: scanType, Location: location });
+                scannedItems.unshift({ Timestamp: timestamp, Barcode: decodedText, Type: scanType, Location: location, Manual: isManual ? 'Yes' : 'No' });
                 
                 // Update UI
                 let li = document.createElement("li");
                 let badgeClass = scanType === "Inward" ? "type-inward" : "type-outward";
+                let manualBadgeHTML = isManual ? `<span class="manual-badge">✍️ Manual</span>` : '';
+                
                 li.innerHTML = `
                     <div class="badges-container">
                         <span class="type-badge ${badgeClass}">${scanType}</span>
                         <span class="loc-badge">📍 ${location}</span>
+                        ${manualBadgeHTML}
                     </div>
                     <span class="barcode-text">${decodedText}</span> 
                     <span class="time-text">${timestamp}</span>
@@ -127,6 +145,28 @@
                 } else {
                     showStatus("Not connected to Google Sheets yet. Saved locally.", "#fef08a", "#854d0e");
                 }
+            } else {
+                showStatus("⚠️ Already scanned just now!", "#fef08a", "#854d0e");
+                setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 2000);
+            }
+        }
+
+        // Triggered by camera
+        function onScanSuccess(decodedText, decodedResult) {
+            processBarcode(decodedText, false);
+        }
+
+        // Triggered by manual entry button
+        function submitManualEntry() {
+            let inputField = document.getElementById("manualBarcode");
+            let manualCode = inputField.value.trim();
+            
+            if(manualCode !== "") {
+                processBarcode(manualCode, true);
+                inputField.value = ""; // clear the box after submitting
+            } else {
+                showStatus("⚠️ Please type a barcode first.", "#fce8e6", "#c5221f");
+                setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 2000);
             }
         }
 
