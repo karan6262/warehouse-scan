@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner Dark Pro</title>
+    <title>Warehouse Scanner Ultimate</title>
     
     <!-- Modern Font & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,18 +15,17 @@
     
     <style>
         :root {
-            /* Dark Mode Color Palette */
-            --bg-color: #0f172a; /* Deep Slate Background */
-            --card-bg: #1e293b; /* Lighter Slate for Cards */
-            --text-main: #f8fafc; /* Crisp White Text */
-            --text-muted: #94a3b8; /* Muted Gray Text */
-            --primary: #3b82f6; /* Blue Accent */
+            --bg-color: #0f172a; 
+            --card-bg: #1e293b; 
+            --text-main: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --primary: #3b82f6; 
             --primary-hover: #2563eb;
-            --success: #10b981; /* Emerald Green */
-            --danger: #ef4444; /* Red */
-            --border: #334155; /* Dark Borders */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --border: #334155; 
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -94,7 +93,7 @@
         }
         select:focus { border-color: var(--primary); }
 
-        /* iOS Style Segmented Control */
+        /* iOS Segmented Control */
         .segmented-control {
             display: flex;
             background: var(--bg-color);
@@ -119,16 +118,11 @@
             gap: 6px;
         }
         .segmented-control input[type="radio"] { display: none; }
-        input[value="Inward"]:checked + label { background: var(--success); color: white; box-shadow: var(--shadow-sm); }
-        input[value="Outward"]:checked + label { background: var(--danger); color: white; box-shadow: var(--shadow-sm); }
+        input[value="Inward"]:checked + label { background: var(--success); color: white; }
+        input[value="Outward"]:checked + label { background: var(--danger); color: white; }
 
-        /* Camera Scanner Customization */
-        #reader { 
-            border: none !important; 
-            border-radius: 16px; 
-            overflow: hidden; 
-            background: #000;
-        }
+        /* Scanner Customization */
+        #reader { border: none !important; border-radius: 16px; overflow: hidden; background: #000; }
         #reader img { display: none !important; }
         #reader button {
             background: var(--primary) !important;
@@ -141,14 +135,13 @@
         }
         #reader__dashboard_section_csr span { color: var(--text-muted) !important; font-family: 'Inter', sans-serif !important; }
 
-        /* Modern Manual Entry */
+        /* Manual Entry */
         .manual-entry {
             display: flex;
             background: var(--bg-color);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 6px;
-            transition: border-color 0.2s;
             margin-top: 16px;
         }
         .manual-entry:focus-within { border-color: var(--primary); }
@@ -159,7 +152,6 @@
             padding: 10px 12px;
             font-size: 16px;
             outline: none;
-            font-family: 'Inter', sans-serif;
             color: var(--text-main);
         }
         .manual-entry button {
@@ -170,29 +162,39 @@
             padding: 0 20px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .manual-entry button:active { background: var(--primary-hover); transform: scale(0.98); }
 
-        /* Status Toast */
+        /* Floating iOS-Style Toast */
         .status-toast {
-            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px); /* Hidden by default */
+            z-index: 1000;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px 24px;
+            border-radius: 30px;
             font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 16px;
-            animation: slideDown 0.3s ease;
+            font-size: 15px;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            width: max-content;
+            max-width: 90%;
         }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .status-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
 
-        /* List Styles */
+        /* List Styles & Animations */
         .list-header {
             display: flex;
             justify-content: space-between;
@@ -201,7 +203,9 @@
             padding: 0 4px;
         }
         .list-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
-        .list-header span { font-size: 13px; font-weight: 600; color: var(--text-main); background: var(--card-bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .clear-btn { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px; }
+        .scan-count { font-size: 13px; font-weight: 600; color: var(--text-main); background: var(--card-bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 12px; }
         
         ul { list-style: none; padding: 0; margin: 0; }
         li {
@@ -209,17 +213,22 @@
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             gap: 10px;
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(-10px);
         }
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .scan-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .barcode-val { font-size: 18px; font-weight: 700; font-family: monospace; color: var(--text-main); word-break: break-all;}
         .scan-time { font-size: 12px; color: var(--text-muted); font-weight: 500; }
         
-        /* Dark Mode Optimized Badges */
         .badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .badge { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
         .bg-inward { background: #064e3b; color: #34d399; }
@@ -242,24 +251,24 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: all 0.2s;
             margin-top: 10px;
-            font-family: 'Inter', sans-serif;
         }
         .export-btn:not(:disabled):active { background: var(--success); color: white; }
-        .export-btn:disabled { border-color: var(--border); color: var(--text-muted); cursor: not-allowed; opacity: 0.7; }
+        .export-btn:disabled { border-color: var(--border); color: var(--text-muted); opacity: 0.7; }
     </style>
 </head>
 <body>
+    
+    <!-- FLOATING TOAST -->
+    <div id="syncStatus" class="status-toast"></div>
+
     <div class="container">
-        
         <div class="app-header">
             <i class='bx bx-barcode-reader'></i>
-            <h2>Warehouse Scanner</h2>
+            <h2>Scanner Pro</h2>
         </div>
 
         <div class="card">
-            <!-- WAREHOUSE SELECTION -->
             <div class="input-label"><i class='bx bx-store-alt'></i> Active Location</div>
             <div class="select-wrapper">
                 <select id="warehouse">
@@ -272,7 +281,6 @@
                 <i class='bx bx-chevron-down'></i>
             </div>
             
-            <!-- INWARD / OUTWARD SELECTION -->
             <div class="segmented-control">
                 <input type="radio" id="inwardType" name="scanType" value="Inward" checked>
                 <label for="inwardType"><i class='bx bx-import'></i> Inward</label>
@@ -282,12 +290,10 @@
             </div>
         </div>
 
-        <!-- CAMERA SCANNER -->
         <div class="card" style="padding: 0;">
             <div id="reader"></div>
         </div>
         
-        <!-- MANUAL ENTRY -->
         <div class="card">
             <div class="input-label"><i class='bx bx-keyboard'></i> Manual Entry</div>
             <div class="manual-entry">
@@ -296,17 +302,15 @@
             </div>
         </div>
         
-        <!-- TOAST NOTIFICATION -->
-        <div id="syncStatus" class="status-toast"></div>
-        
-        <!-- SCANNED LIST -->
         <div class="list-header">
             <h3>Recent Scans</h3>
-            <span id="scanCount">0 items</span>
+            <div class="header-actions">
+                <button class="clear-btn" onclick="clearList()" title="Clear List"><i class='bx bx-trash'></i></button>
+                <span class="scan-count" id="scanCount">0 items</span>
+            </div>
         </div>
         <ul id="scannedList"></ul>
 
-        <!-- BACKUP EXCEL -->
         <button class="export-btn" id="exportBtn" onclick="exportToExcel()" disabled>
             <i class='bx bx-spreadsheet'></i> Backup to Excel
         </button>
@@ -321,8 +325,8 @@
         /* ========================================== */
 
         let scannedItems = [];
+        let toastTimeout;
         
-        // Allow pressing "Enter" on keyboard to submit manual entry
         document.getElementById("manualBarcode").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -330,9 +334,17 @@
             }
         });
         
+        // Haptic Feedback Helper
+        function triggerVibration(type) {
+            if (!navigator.vibrate) return;
+            if (type === 'success') navigator.vibrate(100); // Short single buzz
+            if (type === 'error') navigator.vibrate([100, 50, 100]); // Double buzz
+        }
+
         function processBarcode(decodedText, isManual = false) {
             if(!scannedItems.find(item => item.Barcode === decodedText)) {
                 
+                triggerVibration('success');
                 try { new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play(); } catch(e) {}
 
                 let timestamp = new Date().toLocaleString();
@@ -341,7 +353,6 @@
                 
                 scannedItems.unshift({ Timestamp: timestamp, Barcode: decodedText, Type: scanType, Location: location, Manual: isManual ? 'Yes' : 'No' });
                 
-                // Update UI List
                 let li = document.createElement("li");
                 let typeBadge = scanType === "Inward" 
                     ? `<div class="badge bg-inward"><i class='bx bx-import'></i> Inward</div>` 
@@ -367,15 +378,14 @@
                 document.getElementById("exportBtn").disabled = false;
                 document.getElementById("scanCount").innerText = `${scannedItems.length} items`;
 
-                // Send Data
                 if (GOOGLE_WEB_APP_URL !== "YOUR_GOOGLE_SCRIPT_URL_HERE") {
                     sendToGoogleSheet(decodedText, scanType, location, timestamp);
                 } else {
-                    showStatus("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "#78350f", "#fbbf24");
+                    showToast("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "#78350f", "#fbbf24");
                 }
             } else {
-                showStatus("<i class='bx bx-error'></i> Already scanned!", "#78350f", "#fbbf24");
-                setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 2500);
+                triggerVibration('error');
+                showToast("<i class='bx bx-error'></i> Already scanned!", "#78350f", "#fbbf24");
             }
         }
 
@@ -390,15 +400,15 @@
             if(manualCode !== "") {
                 processBarcode(manualCode, true);
                 inputField.value = ""; 
-                inputField.blur(); // Hide keyboard
+                inputField.blur(); 
             } else {
-                showStatus("<i class='bx bx-x-circle'></i> Type a barcode first", "#7f1d1d", "#f87171");
-                setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 2500);
+                triggerVibration('error');
+                showToast("<i class='bx bx-x-circle'></i> Type a barcode first", "#7f1d1d", "#f87171");
             }
         }
 
         function sendToGoogleSheet(barcode, type, location, timestamp) {
-            showStatus("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "#0c4a6e", "#38bdf8");
+            showToast("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "#0c4a6e", "#38bdf8", true);
             
             const urlParams = new URLSearchParams();
             urlParams.append("barcode", barcode);
@@ -411,22 +421,36 @@
                 body: urlParams,
                 mode: "no-cors" 
             }).then(() => {
-                showStatus("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "#064e3b", "#34d399");
-                setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 3000);
+                showToast("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "#064e3b", "#34d399");
             }).catch(error => {
-                showStatus("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "#7f1d1d", "#f87171");
+                triggerVibration('error');
+                showToast("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "#7f1d1d", "#f87171");
             });
         }
 
-        function showStatus(htmlContent, bgColor, textColor) {
-            let status = document.getElementById("syncStatus");
-            status.innerHTML = htmlContent;
-            status.style.backgroundColor = bgColor;
-            status.style.color = textColor;
-            status.style.display = "flex";
+        function showToast(htmlContent, bgColor, textColor, persist = false) {
+            let toast = document.getElementById("syncStatus");
+            clearTimeout(toastTimeout);
+            
+            toast.innerHTML = htmlContent;
+            toast.style.backgroundColor = bgColor;
+            toast.style.color = textColor;
+            toast.classList.add("show");
+            
+            if(!persist) {
+                toastTimeout = setTimeout(() => { toast.classList.remove("show"); }, 2500);
+            }
         }
 
-        // Initialize Scanner with customized UI
+        function clearList() {
+            if(confirm("Clear the list from your screen? (This will not delete data from Google Sheets)")) {
+                scannedItems = [];
+                document.getElementById("scannedList").innerHTML = "";
+                document.getElementById("scanCount").innerText = "0 items";
+                document.getElementById("exportBtn").disabled = true;
+            }
+        }
+
         let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
             fps: 10, 
             qrbox: {width: 250, height: 250}, 
