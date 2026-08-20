@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner V7</title>
+    <title>Warehouse Scanner V7.1</title>
     
     <!-- Modern Font & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,7 +26,6 @@
             --border: #334155; 
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            --glass-bg: rgba(30, 41, 59, 0.8);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -181,7 +180,7 @@
         <div class="app-header">
             <div class="header-title">
                 <i class='bx bx-qr-scan'></i>
-                <h2>Scanner V7</h2>
+                <h2>Scanner V7.1</h2>
             </div>
             <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Full Screen">
                 <i class='bx bx-fullscreen'></i>
@@ -291,13 +290,16 @@
         }
 
         function processBarcode(decodedText, isManual = false) {
-            if(!scannedItems.find(item => item.Barcode === decodedText)) {
+            // BUG FIX: We now check the Scan Type FIRST before looking for duplicates
+            let scanType = document.querySelector('input[name="scanType"]:checked').value;
+            
+            // BUG FIX: The app now checks if we already scanned THIS barcode for THIS specific action
+            if(!scannedItems.find(item => item.Barcode === decodedText && item.Type === scanType)) {
                 
                 triggerVibration('success');
                 try { new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play(); } catch(e) {}
 
                 let timestamp = new Date().toLocaleString();
-                let scanType = document.querySelector('input[name="scanType"]:checked').value;
                 let location = document.getElementById("warehouse").value;
                 
                 scannedItems.unshift({ Timestamp: timestamp, Barcode: decodedText, Type: scanType, Location: location, Manual: isManual ? 'Yes' : 'No' });
@@ -335,7 +337,7 @@
                 }
             } else {
                 triggerVibration('error');
-                showToast("<i class='bx bx-error'></i> Already scanned!", "rgba(120, 53, 15, 0.9)", "#fbbf24");
+                showToast("<i class='bx bx-error'></i> Already scanned " + scanType + "!", "rgba(120, 53, 15, 0.9)", "#fbbf24");
             }
         }
 
