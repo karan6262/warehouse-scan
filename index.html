@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner Ultimate</title>
+    <title>Warehouse Scanner V7</title>
     
     <!-- Modern Font & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,8 +24,9 @@
             --success: #10b981; 
             --danger: #ef4444; 
             --border: #334155; 
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --glass-bg: rgba(30, 41, 59, 0.8);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -45,13 +46,14 @@
         .app-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            justify-content: space-between;
             margin-bottom: 20px;
-            padding-top: 10px;
+            padding: 10px 0;
         }
-        .app-header i { font-size: 28px; color: var(--primary); }
-        .app-header h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-title { display: flex; align-items: center; gap: 8px; }
+        .header-title i { font-size: 28px; color: var(--primary); }
+        .header-title h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .fullscreen-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px; border-radius: 10px; cursor: pointer; display: flex; font-size: 20px; }
 
         /* Cards */
         .card {
@@ -64,116 +66,50 @@
         }
 
         /* Dropdown */
-        .input-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
+        .input-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .select-wrapper { position: relative; }
         .select-wrapper i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;}
-        select {
-            width: 100%;
-            appearance: none;
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px 14px;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-main);
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        select:focus { border-color: var(--primary); }
-
-        /* iOS Segmented Control */
-        .segmented-control {
-            display: flex;
-            background: var(--bg-color);
-            padding: 4px;
-            border-radius: 12px;
-            margin-top: 16px;
-            border: 1px solid var(--border);
-        }
-        .segmented-control label {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
+        select { width: 100%; appearance: none; background: var(--bg-color); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 16px; font-weight: 600; font-family: 'Inter', sans-serif; color: var(--text-main); outline: none; }
+        
+        /* Segmented Control */
+        .segmented-control { display: flex; background: var(--bg-color); padding: 4px; border-radius: 12px; margin-top: 16px; border: 1px solid var(--border); }
+        .segmented-control label { flex: 1; text-align: center; padding: 10px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 10px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .segmented-control input[type="radio"] { display: none; }
         input[value="Inward"]:checked + label { background: var(--success); color: white; }
         input[value="Outward"]:checked + label { background: var(--danger); color: white; }
 
-        /* Scanner Customization */
-        #reader { border: none !important; border-radius: 16px; overflow: hidden; background: #000; }
-        #reader img { display: none !important; }
-        #reader button {
-            background: var(--primary) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 8px 16px !important;
-            font-weight: 600 !important;
-            font-family: 'Inter', sans-serif !important;
+        /* Custom Scanner Wrapper with Laser */
+        .scanner-wrapper { position: relative; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid var(--border); }
+        .laser {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ef4444;
+            box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.5);
+            z-index: 10;
+            animation: scan-laser 2s infinite ease-in-out alternate;
+            pointer-events: none;
         }
+        @keyframes scan-laser { 0% { top: 10%; } 100% { top: 90%; } }
+
+        #reader { border: none !important; }
+        #reader img { display: none !important; }
+        #reader button { background: var(--primary) !important; color: white !important; border: none !important; border-radius: 8px !important; padding: 8px 16px !important; font-weight: 600 !important; font-family: 'Inter', sans-serif !important; margin-bottom: 10px; }
         #reader__dashboard_section_csr span { color: var(--text-muted) !important; font-family: 'Inter', sans-serif !important; }
 
         /* Manual Entry */
-        .manual-entry {
-            display: flex;
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 6px;
-            margin-top: 16px;
-        }
+        .manual-entry { display: flex; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; padding: 6px; margin-top: 16px; }
         .manual-entry:focus-within { border-color: var(--primary); }
-        .manual-entry input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 10px 12px;
-            font-size: 16px;
-            outline: none;
-            color: var(--text-main);
-        }
-        .manual-entry button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0 20px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .manual-entry button:active { background: var(--primary-hover); transform: scale(0.98); }
+        .manual-entry input { flex: 1; border: none; background: transparent; padding: 10px 12px; font-size: 16px; outline: none; color: var(--text-main); }
+        .manual-entry button { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-        /* Floating iOS-Style Toast */
+        /* Frosted Glass Toast */
         .status-toast {
             position: fixed;
             top: 20px;
             left: 50%;
-            transform: translateX(-50%) translateY(-100px); /* Hidden by default */
+            transform: translateX(-50%) translateY(-100px); 
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -188,25 +124,22 @@
             opacity: 0;
             width: max-content;
             max-width: 90%;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-        .status-toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+        .status-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* List Styles & Animations */
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding: 0 4px;
-        }
+        /* List Styles & Empty State */
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
         .list-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .clear-btn { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px; }
         .scan-count { font-size: 13px; font-weight: 600; color: var(--text-main); background: var(--card-bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 12px; }
         
+        .empty-state { text-align: center; padding: 30px 10px; color: var(--text-muted); }
+        .empty-state i { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
+        .empty-state p { margin: 0; font-size: 14px; font-weight: 500; }
+
         ul { list-style: none; padding: 0; margin: 0; }
         li {
             background: var(--card-bg);
@@ -221,9 +154,7 @@
             opacity: 0;
             transform: translateY(-10px);
         }
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
 
         .scan-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .barcode-val { font-size: 18px; font-weight: 700; font-family: monospace; color: var(--text-main); word-break: break-all;}
@@ -231,41 +162,30 @@
         
         .badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .badge { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-        .bg-inward { background: #064e3b; color: #34d399; }
-        .bg-outward { background: #7f1d1d; color: #f87171; }
-        .bg-loc { background: var(--border); color: var(--text-main); }
-        .bg-manual { background: #78350f; color: #fbbf24; }
+        .bg-inward { background: rgba(6, 78, 59, 0.7); color: #34d399; }
+        .bg-outward { background: rgba(127, 29, 29, 0.7); color: #f87171; }
+        .bg-loc { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
+        .bg-manual { background: rgba(120, 53, 15, 0.7); color: #fbbf24; }
 
         /* Export Button */
-        .export-btn {
-            background: transparent;
-            color: var(--success);
-            border: 2px solid var(--success);
-            padding: 14px;
-            border-radius: 12px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-        }
+        .export-btn { background: transparent; color: var(--success); border: 2px solid var(--success); padding: 14px; border-radius: 12px; width: 100%; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; transition: 0.2s; }
         .export-btn:not(:disabled):active { background: var(--success); color: white; }
-        .export-btn:disabled { border-color: var(--border); color: var(--text-muted); opacity: 0.7; }
+        .export-btn:disabled { border-color: var(--border); color: var(--text-muted); opacity: 0.5; }
     </style>
 </head>
 <body>
     
-    <!-- FLOATING TOAST -->
     <div id="syncStatus" class="status-toast"></div>
 
     <div class="container">
         <div class="app-header">
-            <i class='bx bx-barcode-reader'></i>
-            <h2>Scanner Pro</h2>
+            <div class="header-title">
+                <i class='bx bx-qr-scan'></i>
+                <h2>Scanner V7</h2>
+            </div>
+            <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Full Screen">
+                <i class='bx bx-fullscreen'></i>
+            </button>
         </div>
 
         <div class="card">
@@ -283,15 +203,18 @@
             
             <div class="segmented-control">
                 <input type="radio" id="inwardType" name="scanType" value="Inward" checked>
-                <label for="inwardType"><i class='bx bx-import'></i> Inward</label>
+                <label for="inwardType"><i class='bx bx-down-arrow-circle'></i> Inward</label>
                 
                 <input type="radio" id="outwardType" name="scanType" value="Outward">
-                <label for="outwardType"><i class='bx bx-export'></i> Outward</label>
+                <label for="outwardType"><i class='bx bx-up-arrow-circle'></i> Outward</label>
             </div>
         </div>
 
-        <div class="card" style="padding: 0;">
-            <div id="reader"></div>
+        <div class="card" style="padding: 0; border: none; background: transparent;">
+            <div class="scanner-wrapper">
+                <div class="laser"></div>
+                <div id="reader"></div>
+            </div>
         </div>
         
         <div class="card">
@@ -309,6 +232,12 @@
                 <span class="scan-count" id="scanCount">0 items</span>
             </div>
         </div>
+        
+        <div id="emptyState" class="empty-state">
+            <i class='bx bx-box bx-tada'></i>
+            <p>Awaiting your first scan...</p>
+        </div>
+        
         <ul id="scannedList"></ul>
 
         <button class="export-btn" id="exportBtn" onclick="exportToExcel()" disabled>
@@ -334,11 +263,31 @@
             }
         });
         
-        // Haptic Feedback Helper
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
         function triggerVibration(type) {
             if (!navigator.vibrate) return;
-            if (type === 'success') navigator.vibrate(100); // Short single buzz
-            if (type === 'error') navigator.vibrate([100, 50, 100]); // Double buzz
+            if (type === 'success') navigator.vibrate(100); 
+            if (type === 'error') navigator.vibrate([100, 50, 100]); 
+        }
+
+        function updateEmptyState() {
+            const emptyState = document.getElementById("emptyState");
+            if(scannedItems.length > 0) {
+                emptyState.style.display = "none";
+            } else {
+                emptyState.style.display = "block";
+            }
         }
 
         function processBarcode(decodedText, isManual = false) {
@@ -352,11 +301,12 @@
                 let location = document.getElementById("warehouse").value;
                 
                 scannedItems.unshift({ Timestamp: timestamp, Barcode: decodedText, Type: scanType, Location: location, Manual: isManual ? 'Yes' : 'No' });
+                updateEmptyState();
                 
                 let li = document.createElement("li");
                 let typeBadge = scanType === "Inward" 
-                    ? `<div class="badge bg-inward"><i class='bx bx-import'></i> Inward</div>` 
-                    : `<div class="badge bg-outward"><i class='bx bx-export'></i> Outward</div>`;
+                    ? `<div class="badge bg-inward"><i class='bx bx-down-arrow-circle'></i> Inward</div>` 
+                    : `<div class="badge bg-outward"><i class='bx bx-up-arrow-circle'></i> Outward</div>`;
                 
                 let manualBadge = isManual ? `<div class="badge bg-manual"><i class='bx bx-keyboard'></i> Manual</div>` : '';
                 
@@ -381,11 +331,11 @@
                 if (GOOGLE_WEB_APP_URL !== "YOUR_GOOGLE_SCRIPT_URL_HERE") {
                     sendToGoogleSheet(decodedText, scanType, location, timestamp);
                 } else {
-                    showToast("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "#78350f", "#fbbf24");
+                    showToast("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "rgba(120, 53, 15, 0.9)", "#fbbf24");
                 }
             } else {
                 triggerVibration('error');
-                showToast("<i class='bx bx-error'></i> Already scanned!", "#78350f", "#fbbf24");
+                showToast("<i class='bx bx-error'></i> Already scanned!", "rgba(120, 53, 15, 0.9)", "#fbbf24");
             }
         }
 
@@ -403,12 +353,12 @@
                 inputField.blur(); 
             } else {
                 triggerVibration('error');
-                showToast("<i class='bx bx-x-circle'></i> Type a barcode first", "#7f1d1d", "#f87171");
+                showToast("<i class='bx bx-x-circle'></i> Type a barcode first", "rgba(127, 29, 29, 0.9)", "#f87171");
             }
         }
 
         function sendToGoogleSheet(barcode, type, location, timestamp) {
-            showToast("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "#0c4a6e", "#38bdf8", true);
+            showToast("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
             
             const urlParams = new URLSearchParams();
             urlParams.append("barcode", barcode);
@@ -421,10 +371,10 @@
                 body: urlParams,
                 mode: "no-cors" 
             }).then(() => {
-                showToast("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "#064e3b", "#34d399");
+                showToast("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "rgba(6, 78, 59, 0.9)", "#34d399");
             }).catch(error => {
                 triggerVibration('error');
-                showToast("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "#7f1d1d", "#f87171");
+                showToast("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "rgba(127, 29, 29, 0.9)", "#f87171");
             });
         }
 
@@ -435,6 +385,7 @@
             toast.innerHTML = htmlContent;
             toast.style.backgroundColor = bgColor;
             toast.style.color = textColor;
+            toast.style.border = `1px solid ${textColor}40`;
             toast.classList.add("show");
             
             if(!persist) {
@@ -448,6 +399,7 @@
                 document.getElementById("scannedList").innerHTML = "";
                 document.getElementById("scanCount").innerText = "0 items";
                 document.getElementById("exportBtn").disabled = true;
+                updateEmptyState();
             }
         }
 
@@ -459,13 +411,6 @@
         }, false);
         html5QrcodeScanner.render(onScanSuccess);
 
-        function exportToExcel() {
-            if(scannedItems.length === 0) return;
-            const ws = XLSX.utils.json_to_sheet(scannedItems);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Warehouse Data");
-            XLSX.writeFile(wb, "Warehouse_Scans_" + new Date().toISOString().slice(0,10) + ".xlsx");
-        }
     </script>
 </body>
 </html>
