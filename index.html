@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner Pro</title>
+    <title>Warehouse Scanner Dark Pro</title>
     
     <!-- Modern Font & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,17 +15,18 @@
     
     <style>
         :root {
-            --bg-color: #f3f4f6;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --primary: #3b82f6;
+            /* Dark Mode Color Palette */
+            --bg-color: #0f172a; /* Deep Slate Background */
+            --card-bg: #1e293b; /* Lighter Slate for Cards */
+            --text-main: #f8fafc; /* Crisp White Text */
+            --text-muted: #94a3b8; /* Muted Gray Text */
+            --primary: #3b82f6; /* Blue Accent */
             --primary-hover: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --border: #e5e7eb;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --success: #10b981; /* Emerald Green */
+            --danger: #ef4444; /* Red */
+            --border: #334155; /* Dark Borders */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -60,6 +61,7 @@
             padding: 16px;
             box-shadow: var(--shadow-md);
             margin-bottom: 16px;
+            border: 1px solid var(--border);
         }
 
         /* Dropdown */
@@ -79,7 +81,7 @@
         select {
             width: 100%;
             appearance: none;
-            background: #f9fafb;
+            background: var(--bg-color);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px 14px;
@@ -95,10 +97,11 @@
         /* iOS Style Segmented Control */
         .segmented-control {
             display: flex;
-            background: #f1f5f9;
+            background: var(--bg-color);
             padding: 4px;
             border-radius: 12px;
             margin-top: 16px;
+            border: 1px solid var(--border);
         }
         .segmented-control label {
             flex: 1;
@@ -141,7 +144,7 @@
         /* Modern Manual Entry */
         .manual-entry {
             display: flex;
-            background: #f9fafb;
+            background: var(--bg-color);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 6px;
@@ -198,7 +201,7 @@
             padding: 0 4px;
         }
         .list-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
-        .list-header span { font-size: 13px; font-weight: 600; color: var(--text-muted); background: #e5e7eb; padding: 2px 8px; border-radius: 12px; }
+        .list-header span { font-size: 13px; font-weight: 600; color: var(--text-main); background: var(--card-bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; }
         
         ul { list-style: none; padding: 0; margin: 0; }
         li {
@@ -216,18 +219,19 @@
         .barcode-val { font-size: 18px; font-weight: 700; font-family: monospace; color: var(--text-main); word-break: break-all;}
         .scan-time { font-size: 12px; color: var(--text-muted); font-weight: 500; }
         
+        /* Dark Mode Optimized Badges */
         .badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .badge { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-        .bg-inward { background: #d1fae5; color: #065f46; }
-        .bg-outward { background: #fee2e2; color: #991b1b; }
-        .bg-loc { background: #f3f4f6; color: #374151; }
-        .bg-manual { background: #fef3c7; color: #92400e; }
+        .bg-inward { background: #064e3b; color: #34d399; }
+        .bg-outward { background: #7f1d1d; color: #f87171; }
+        .bg-loc { background: var(--border); color: var(--text-main); }
+        .bg-manual { background: #78350f; color: #fbbf24; }
 
         /* Export Button */
         .export-btn {
-            background: white;
-            color: #059669;
-            border: 2px solid #059669;
+            background: transparent;
+            color: var(--success);
+            border: 2px solid var(--success);
             padding: 14px;
             border-radius: 12px;
             width: 100%;
@@ -242,7 +246,7 @@
             margin-top: 10px;
             font-family: 'Inter', sans-serif;
         }
-        .export-btn:not(:disabled):active { background: #059669; color: white; }
+        .export-btn:not(:disabled):active { background: var(--success); color: white; }
         .export-btn:disabled { border-color: var(--border); color: var(--text-muted); cursor: not-allowed; opacity: 0.7; }
     </style>
 </head>
@@ -313,7 +317,7 @@
         /* ==========================================
            PASTE YOUR GOOGLE SHEET WEB APP URL BELOW
            ========================================== */
-   const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRErVy_ezJMtHvAYGxYHQQmqHG3IFZKAI3KQNRyQvn2egg_n24SFk-kSEQYW_aNU6t/exec";
+        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRErVy_ezJMtHvAYGxYHQQmqHG3IFZKAI3KQNRyQvn2egg_n24SFk-kSEQYW_aNU6t/exec";
         /* ========================================== */
 
         let scannedItems = [];
@@ -367,10 +371,10 @@
                 if (GOOGLE_WEB_APP_URL !== "YOUR_GOOGLE_SCRIPT_URL_HERE") {
                     sendToGoogleSheet(decodedText, scanType, location, timestamp);
                 } else {
-                    showStatus("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "#fef3c7", "#92400e");
+                    showStatus("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "#78350f", "#fbbf24");
                 }
             } else {
-                showStatus("<i class='bx bx-error'></i> Already scanned!", "#fef3c7", "#92400e");
+                showStatus("<i class='bx bx-error'></i> Already scanned!", "#78350f", "#fbbf24");
                 setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 2500);
             }
         }
@@ -388,13 +392,13 @@
                 inputField.value = ""; 
                 inputField.blur(); // Hide keyboard
             } else {
-                showStatus("<i class='bx bx-x-circle'></i> Type a barcode first", "#fee2e2", "#991b1b");
+                showStatus("<i class='bx bx-x-circle'></i> Type a barcode first", "#7f1d1d", "#f87171");
                 setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 2500);
             }
         }
 
         function sendToGoogleSheet(barcode, type, location, timestamp) {
-            showStatus("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "#e0f2fe", "#0369a1");
+            showStatus("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "#0c4a6e", "#38bdf8");
             
             const urlParams = new URLSearchParams();
             urlParams.append("barcode", barcode);
@@ -407,10 +411,10 @@
                 body: urlParams,
                 mode: "no-cors" 
             }).then(() => {
-                showStatus("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "#d1fae5", "#065f46");
+                showStatus("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "#064e3b", "#34d399");
                 setTimeout(() => { document.getElementById("syncStatus").style.display = "none"; }, 3000);
             }).catch(error => {
-                showStatus("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "#fee2e2", "#991b1b");
+                showStatus("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "#7f1d1d", "#f87171");
             });
         }
 
