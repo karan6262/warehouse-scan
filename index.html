@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner V7.1</title>
+    <title>Warehouse Scanner V9</title>
     
-    <!-- Modern Font & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    
-    <!-- Scanners and Export -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
@@ -30,105 +27,44 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            padding: 16px; 
-            background: var(--bg-color); 
-            color: var(--text-main);
-            padding-bottom: 40px;
-        }
-
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 16px; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
         .container { max-width: 500px; margin: 0 auto; }
 
-        /* Header */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 10px 0;
-        }
+        .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 10px 0; }
         .header-title { display: flex; align-items: center; gap: 8px; }
         .header-title i { font-size: 28px; color: var(--primary); }
         .header-title h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
         .fullscreen-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px; border-radius: 10px; cursor: pointer; display: flex; font-size: 20px; }
 
-        /* Cards */
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: var(--shadow-md);
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-        }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 16px; box-shadow: var(--shadow-md); margin-bottom: 16px; border: 1px solid var(--border); }
 
-        /* Dropdown */
         .input-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .select-wrapper { position: relative; }
         .select-wrapper i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;}
         select { width: 100%; appearance: none; background: var(--bg-color); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 16px; font-weight: 600; font-family: 'Inter', sans-serif; color: var(--text-main); outline: none; }
         
-        /* Segmented Control */
         .segmented-control { display: flex; background: var(--bg-color); padding: 4px; border-radius: 12px; margin-top: 16px; border: 1px solid var(--border); }
         .segmented-control label { flex: 1; text-align: center; padding: 10px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 10px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .segmented-control input[type="radio"] { display: none; }
         input[value="Inward"]:checked + label { background: var(--success); color: white; }
         input[value="Outward"]:checked + label { background: var(--danger); color: white; }
 
-        /* Custom Scanner Wrapper with Laser */
         .scanner-wrapper { position: relative; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid var(--border); }
-        .laser {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: #ef4444;
-            box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.5);
-            z-index: 10;
-            animation: scan-laser 2s infinite ease-in-out alternate;
-            pointer-events: none;
-        }
+        .laser { position: absolute; left: 0; width: 100%; height: 2px; background: #ef4444; box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.5); z-index: 10; animation: scan-laser 2s infinite ease-in-out alternate; pointer-events: none; }
         @keyframes scan-laser { 0% { top: 10%; } 100% { top: 90%; } }
-
         #reader { border: none !important; }
         #reader img { display: none !important; }
         #reader button { background: var(--primary) !important; color: white !important; border: none !important; border-radius: 8px !important; padding: 8px 16px !important; font-weight: 600 !important; font-family: 'Inter', sans-serif !important; margin-bottom: 10px; }
         #reader__dashboard_section_csr span { color: var(--text-muted) !important; font-family: 'Inter', sans-serif !important; }
 
-        /* Manual Entry */
         .manual-entry { display: flex; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; padding: 6px; margin-top: 16px; }
         .manual-entry:focus-within { border-color: var(--primary); }
         .manual-entry input { flex: 1; border: none; background: transparent; padding: 10px 12px; font-size: 16px; outline: none; color: var(--text-main); }
         .manual-entry button { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-        /* Frosted Glass Toast */
-        .status-toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px); 
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 14px 24px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 15px;
-            box-shadow: var(--shadow-lg);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0;
-            width: max-content;
-            max-width: 90%;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
+        .status-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 1000; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; border-radius: 30px; font-weight: 600; font-size: 15px; box-shadow: var(--shadow-lg); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; width: max-content; max-width: 90%; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .status-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* List Styles & Empty State */
         .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
         .list-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
         .header-actions { display: flex; align-items: center; gap: 10px; }
@@ -140,25 +76,18 @@
         .empty-state p { margin: 0; font-size: 14px; font-weight: 500; }
 
         ul { list-style: none; padding: 0; margin: 0; }
-        li {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            animation: slideIn 0.3s ease-out forwards;
-            opacity: 0;
-            transform: translateY(-10px);
-        }
+        li { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; animation: slideIn 0.3s ease-out forwards; opacity: 0; transform: translateY(-10px); }
         @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
 
         .scan-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .scan-info { display: flex; flex-direction: column; }
         .barcode-val { font-size: 18px; font-weight: 700; font-family: monospace; color: var(--text-main); word-break: break-all;}
-        .scan-time { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .scan-time { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 2px;}
         
+        /* Delete Button Styles */
+        .item-delete-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: 0.2s; }
+        .item-delete-btn:active { background: var(--danger); color: white; transform: scale(0.9); }
+
         .badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .badge { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
         .bg-inward { background: rgba(6, 78, 59, 0.7); color: #34d399; }
@@ -166,9 +95,7 @@
         .bg-loc { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
         .bg-manual { background: rgba(120, 53, 15, 0.7); color: #fbbf24; }
 
-        /* Export Button */
         .export-btn { background: transparent; color: var(--success); border: 2px solid var(--success); padding: 14px; border-radius: 12px; width: 100%; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; transition: 0.2s; }
-        .export-btn:not(:disabled):active { background: var(--success); color: white; }
         .export-btn:disabled { border-color: var(--border); color: var(--text-muted); opacity: 0.5; }
     </style>
 </head>
@@ -180,7 +107,7 @@
         <div class="app-header">
             <div class="header-title">
                 <i class='bx bx-qr-scan'></i>
-                <h2>Scanner V7.1</h2>
+                <h2>Scanner V9</h2>
             </div>
             <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Full Screen">
                 <i class='bx bx-fullscreen'></i>
@@ -249,11 +176,12 @@
         /* ==========================================
            PASTE YOUR GOOGLE SHEET WEB APP URL BELOW
            ========================================== */
-        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRErVy_ezJMtHvAYGxYHQQmqHG3IFZKAI3KQNRyQvn2egg_n24SFk-kSEQYW_aNU6t/exec";
+        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwQiYnHggh4zzXe-4XoiojX02IyGp1Rjjey3r6tisnqrJab2VJxcrxpX8bkAoPJvG3/exec";
         /* ========================================== */
 
         let scannedItems = [];
         let toastTimeout;
+        let isProcessing = false; 
         
         document.getElementById("manualBarcode").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
@@ -264,13 +192,9 @@
         
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => { console.log(err); });
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                if (document.exitFullscreen) { document.exitFullscreen(); }
             }
         }
 
@@ -282,73 +206,146 @@
 
         function updateEmptyState() {
             const emptyState = document.getElementById("emptyState");
-            if(scannedItems.length > 0) {
-                emptyState.style.display = "none";
-            } else {
-                emptyState.style.display = "block";
+            if(scannedItems.length > 0) { emptyState.style.display = "none"; } 
+            else { emptyState.style.display = "block"; }
+        }
+
+        function deleteSingleItem(barcode, btnElement) {
+            if(confirm("Delete this scan? (This removes it from Google Sheets)")) {
+                
+                // Remove from UI visually
+                let li = btnElement.closest('li');
+                li.remove();
+                
+                // Remove from local array
+                scannedItems = scannedItems.filter(item => item.Barcode !== barcode);
+                document.getElementById("scanCount").innerText = `${scannedItems.length} items`;
+                updateEmptyState();
+                if(scannedItems.length === 0) document.getElementById("exportBtn").disabled = true;
+
+                // Tell Google to Delete it
+                showToast("<i class='bx bx-loader-alt bx-spin'></i> Deleting from sheet...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
+                
+                const urlParams = new URLSearchParams();
+                urlParams.append("barcode", barcode);
+                urlParams.append("type", "Delete");
+                urlParams.append("location", "");
+                urlParams.append("timestamp", new Date().toLocaleString());
+
+                fetch(GOOGLE_WEB_APP_URL, {
+                    method: "POST",
+                    body: urlParams
+                })
+                .then(response => response.text())
+                .then(result => {
+                    triggerVibration('success');
+                    showToast("<i class='bx bx-trash'></i> Scan Deleted", "rgba(127, 29, 29, 0.9)", "#f87171", false);
+                })
+                .catch(err => {
+                    triggerVibration('error');
+                    showToast("<i class='bx bx-wifi-off'></i> Network Error", "rgba(120, 53, 15, 0.9)", "#fbbf24", false);
+                });
             }
+        }
+
+        function addToListOnScreen(barcode, type, location, timestamp, isManual) {
+            scannedItems.unshift({ Timestamp: timestamp, Barcode: barcode, Type: type, Location: location, Manual: isManual ? 'Yes' : 'No' });
+            updateEmptyState();
+            
+            let li = document.createElement("li");
+            let typeBadge = type === "Inward" 
+                ? `<div class="badge bg-inward"><i class='bx bx-down-arrow-circle'></i> Inward</div>` 
+                : `<div class="badge bg-outward"><i class='bx bx-up-arrow-circle'></i> Outward</div>`;
+            
+            let manualBadge = isManual ? `<div class="badge bg-manual"><i class='bx bx-keyboard'></i> Manual</div>` : '';
+            
+            li.innerHTML = `
+                <div class="scan-top">
+                    <div class="scan-info">
+                        <span class="barcode-val">${barcode}</span>
+                        <span class="scan-time">${timestamp.split(', ')[1]}</span>
+                    </div>
+                    <button class="item-delete-btn" onclick="deleteSingleItem('${barcode}', this)">
+                        <i class='bx bx-x'></i>
+                    </button>
+                </div>
+                <div class="badges">
+                    ${typeBadge}
+                    <div class="badge bg-loc"><i class='bx bx-store-alt'></i> ${location}</div>
+                    ${manualBadge}
+                </div>
+            `;
+            
+            const list = document.getElementById("scannedList");
+            list.insertBefore(li, list.firstChild);
+            
+            document.getElementById("exportBtn").disabled = false;
+            document.getElementById("scanCount").innerText = `${scannedItems.length} items`;
         }
 
         function processBarcode(decodedText, isManual = false) {
-            // BUG FIX: We now check the Scan Type FIRST before looking for duplicates
-            let scanType = document.querySelector('input[name="scanType"]:checked').value;
+            if (isProcessing) return; 
             
-            // BUG FIX: The app now checks if we already scanned THIS barcode for THIS specific action
-            if(!scannedItems.find(item => item.Barcode === decodedText && item.Type === scanType)) {
-                
-                triggerVibration('success');
-                try { new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play(); } catch(e) {}
-
-                let timestamp = new Date().toLocaleString();
-                let location = document.getElementById("warehouse").value;
-                
-                scannedItems.unshift({ Timestamp: timestamp, Barcode: decodedText, Type: scanType, Location: location, Manual: isManual ? 'Yes' : 'No' });
-                updateEmptyState();
-                
-                let li = document.createElement("li");
-                let typeBadge = scanType === "Inward" 
-                    ? `<div class="badge bg-inward"><i class='bx bx-down-arrow-circle'></i> Inward</div>` 
-                    : `<div class="badge bg-outward"><i class='bx bx-up-arrow-circle'></i> Outward</div>`;
-                
-                let manualBadge = isManual ? `<div class="badge bg-manual"><i class='bx bx-keyboard'></i> Manual</div>` : '';
-                
-                li.innerHTML = `
-                    <div class="scan-top">
-                        <span class="barcode-val">${decodedText}</span>
-                        <span class="scan-time">${timestamp.split(', ')[1]}</span>
-                    </div>
-                    <div class="badges">
-                        ${typeBadge}
-                        <div class="badge bg-loc"><i class='bx bx-store-alt'></i> ${location}</div>
-                        ${manualBadge}
-                    </div>
-                `;
-                
-                const list = document.getElementById("scannedList");
-                list.insertBefore(li, list.firstChild);
-                
-                document.getElementById("exportBtn").disabled = false;
-                document.getElementById("scanCount").innerText = `${scannedItems.length} items`;
-
-                if (GOOGLE_WEB_APP_URL !== "YOUR_GOOGLE_SCRIPT_URL_HERE") {
-                    sendToGoogleSheet(decodedText, scanType, location, timestamp);
-                } else {
-                    showToast("<i class='bx bx-wifi-off'></i> Offline. Saved locally.", "rgba(120, 53, 15, 0.9)", "#fbbf24");
-                }
-            } else {
+            let scanType = document.querySelector('input[name="scanType"]:checked').value;
+            let location = document.getElementById("warehouse").value;
+            let timestamp = new Date().toLocaleString();
+            
+            if(scannedItems.find(item => item.Barcode === decodedText && item.Type === scanType)) {
                 triggerVibration('error');
-                showToast("<i class='bx bx-error'></i> Already scanned " + scanType + "!", "rgba(120, 53, 15, 0.9)", "#fbbf24");
+                showToast("<i class='bx bx-error'></i> Already scanned this session!", "rgba(120, 53, 15, 0.9)", "#fbbf24");
+                return;
             }
+
+            isProcessing = true;
+            try { new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play(); } catch(e) {}
+            showToast("<i class='bx bx-loader-alt bx-spin'></i> Verifying with sheet...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
+
+            const urlParams = new URLSearchParams();
+            urlParams.append("barcode", decodedText);
+            urlParams.append("type", scanType);
+            urlParams.append("location", location);
+            urlParams.append("timestamp", timestamp);
+
+            fetch(GOOGLE_WEB_APP_URL, {
+                method: "POST",
+                body: urlParams
+            })
+            .then(response => response.text())
+            .then(result => {
+                let serverMessage = result.trim();
+                
+                if (serverMessage === "Not Found") {
+                    triggerVibration('error');
+                    showToast("<i class='bx bx-x-circle'></i> Error: Inward Not Found!", "rgba(127, 29, 29, 0.9)", "#f87171", false);
+                } 
+                else if (serverMessage === "Duplicate") {
+                    triggerVibration('error');
+                    showToast("<i class='bx bx-error'></i> Error: Already Inwarded!", "rgba(120, 53, 15, 0.9)", "#fbbf24", false);
+                } 
+                else if (serverMessage === "Success") {
+                    triggerVibration('success');
+                    showToast("<i class='bx bx-check-circle'></i> " + scanType + " Successful", "rgba(6, 78, 59, 0.9)", "#34d399", false);
+                    addToListOnScreen(decodedText, scanType, location, timestamp, isManual);
+                } 
+                else {
+                    triggerVibration('error');
+                    showToast("<i class='bx bx-error'></i> Unknown Error", "rgba(127, 29, 29, 0.9)", "#f87171", false);
+                }
+            })
+            .catch(error => {
+                triggerVibration('error');
+                showToast("<i class='bx bx-wifi-off'></i> Network Error - Couldn't verify", "rgba(127, 29, 29, 0.9)", "#f87171", false);
+            })
+            .finally(() => {
+                setTimeout(() => { isProcessing = false; }, 1000); 
+            });
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            processBarcode(decodedText, false);
-        }
+        function onScanSuccess(decodedText, decodedResult) { processBarcode(decodedText, false); }
 
         function submitManualEntry() {
             let inputField = document.getElementById("manualBarcode");
             let manualCode = inputField.value.trim();
-            
             if(manualCode !== "") {
                 processBarcode(manualCode, true);
                 inputField.value = ""; 
@@ -359,31 +356,9 @@
             }
         }
 
-        function sendToGoogleSheet(barcode, type, location, timestamp) {
-            showToast("<i class='bx bx-loader-alt bx-spin'></i> Syncing...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
-            
-            const urlParams = new URLSearchParams();
-            urlParams.append("barcode", barcode);
-            urlParams.append("type", type);
-            urlParams.append("location", location);
-            urlParams.append("timestamp", timestamp);
-
-            fetch(GOOGLE_WEB_APP_URL, {
-                method: "POST",
-                body: urlParams,
-                mode: "no-cors" 
-            }).then(() => {
-                showToast("<i class='bx bx-check-circle'></i> Synced to Google Sheet", "rgba(6, 78, 59, 0.9)", "#34d399");
-            }).catch(error => {
-                triggerVibration('error');
-                showToast("<i class='bx bx-cloud-light-rain'></i> Sync failed. Backup to Excel.", "rgba(127, 29, 29, 0.9)", "#f87171");
-            });
-        }
-
         function showToast(htmlContent, bgColor, textColor, persist = false) {
             let toast = document.getElementById("syncStatus");
             clearTimeout(toastTimeout);
-            
             toast.innerHTML = htmlContent;
             toast.style.backgroundColor = bgColor;
             toast.style.color = textColor;
@@ -405,12 +380,7 @@
             }
         }
 
-        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-            fps: 10, 
-            qrbox: {width: 250, height: 250}, 
-            aspectRatio: 1.0,
-            showTorchButtonIfSupported: true 
-        }, false);
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0, showTorchButtonIfSupported: true }, false);
         html5QrcodeScanner.render(onScanSuccess);
 
     </script>
