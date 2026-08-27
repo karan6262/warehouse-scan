@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner V9</title>
+    <title>Warehouse Scanner V10</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -28,7 +28,16 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 16px; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
-        .container { max-width: 500px; margin: 0 auto; }
+        .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 10; }
+
+        /* Full Screen Flash Overlay */
+        #flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999; opacity: 0;
+            transition: opacity 0.15s ease-out;
+        }
+        .flash-success { background-color: rgba(16, 185, 129, 0.35); }
+        .flash-error { background-color: rgba(239, 68, 68, 0.45); }
 
         .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 10px 0; }
         .header-title { display: flex; align-items: center; gap: 8px; }
@@ -84,7 +93,6 @@
         .barcode-val { font-size: 18px; font-weight: 700; font-family: monospace; color: var(--text-main); word-break: break-all;}
         .scan-time { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 2px;}
         
-        /* Delete Button Styles */
         .item-delete-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: 0.2s; }
         .item-delete-btn:active { background: var(--danger); color: white; transform: scale(0.9); }
 
@@ -101,13 +109,14 @@
 </head>
 <body>
     
+    <div id="flash-overlay"></div>
     <div id="syncStatus" class="status-toast"></div>
 
     <div class="container">
         <div class="app-header">
             <div class="header-title">
                 <i class='bx bx-qr-scan'></i>
-                <h2>Scanner V9</h2>
+                <h2>Scanner V10</h2>
             </div>
             <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Full Screen">
                 <i class='bx bx-fullscreen'></i>
@@ -181,7 +190,15 @@
 
         let scannedItems = [];
         let toastTimeout;
-        let isProcessing = false; 
+        let scanCooldown = false; 
+        
+        // Audio Setup & Unlocker
+        let beepSound = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
+        document.body.addEventListener('touchstart', function() {
+            if (beepSound.readyState === 0) {
+                beepSound.play().then(() => { beepSound.pause(); beepSound.currentTime = 0; }).catch(() => {});
+            }
+        }, { once: true });
         
         document.getElementById("manualBarcode").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
@@ -198,10 +215,21 @@
             }
         }
 
-        function triggerVibration(type) {
-            if (!navigator.vibrate) return;
-            if (type === 'success') navigator.vibrate(100); 
-            if (type === 'error') navigator.vibrate([100, 50, 100]); 
+        function triggerFeedback(type) {
+            // Visual Flash
+            let flash = document.getElementById("flash-overlay");
+            flash.className = type === 'success' ? 'flash-success' : 'flash-error';
+            flash.style.opacity = '1';
+            setTimeout(() => { flash.style.opacity = '0'; }, 200);
+
+            // Audio & Vibration
+            if (type === 'success') {
+                if (navigator.vibrate) navigator.vibrate(100);
+                beepSound.currentTime = 0;
+                beepSound.play().catch(()=>{});
+            } else {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+            }
         }
 
         function updateEmptyState() {
@@ -212,18 +240,14 @@
 
         function deleteSingleItem(barcode, btnElement) {
             if(confirm("Delete this scan? (This removes it from Google Sheets)")) {
-                
-                // Remove from UI visually
                 let li = btnElement.closest('li');
                 li.remove();
                 
-                // Remove from local array
                 scannedItems = scannedItems.filter(item => item.Barcode !== barcode);
                 document.getElementById("scanCount").innerText = `${scannedItems.length} items`;
                 updateEmptyState();
                 if(scannedItems.length === 0) document.getElementById("exportBtn").disabled = true;
 
-                // Tell Google to Delete it
                 showToast("<i class='bx bx-loader-alt bx-spin'></i> Deleting from sheet...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
                 
                 const urlParams = new URLSearchParams();
@@ -232,17 +256,12 @@
                 urlParams.append("location", "");
                 urlParams.append("timestamp", new Date().toLocaleString());
 
-                fetch(GOOGLE_WEB_APP_URL, {
-                    method: "POST",
-                    body: urlParams
-                })
+                fetch(GOOGLE_WEB_APP_URL, { method: "POST", body: urlParams })
                 .then(response => response.text())
                 .then(result => {
-                    triggerVibration('success');
                     showToast("<i class='bx bx-trash'></i> Scan Deleted", "rgba(127, 29, 29, 0.9)", "#f87171", false);
                 })
                 .catch(err => {
-                    triggerVibration('error');
                     showToast("<i class='bx bx-wifi-off'></i> Network Error", "rgba(120, 53, 15, 0.9)", "#fbbf24", false);
                 });
             }
@@ -284,20 +303,18 @@
         }
 
         function processBarcode(decodedText, isManual = false) {
-            if (isProcessing) return; 
-            
             let scanType = document.querySelector('input[name="scanType"]:checked').value;
             let location = document.getElementById("warehouse").value;
             let timestamp = new Date().toLocaleString();
             
             if(scannedItems.find(item => item.Barcode === decodedText && item.Type === scanType)) {
-                triggerVibration('error');
+                triggerFeedback('error');
                 showToast("<i class='bx bx-error'></i> Already scanned this session!", "rgba(120, 53, 15, 0.9)", "#fbbf24");
                 return;
             }
 
-            isProcessing = true;
-            try { new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play(); } catch(e) {}
+            // Provide immediate UI feedback that a code was caught
+            triggerFeedback('success');
             showToast("<i class='bx bx-loader-alt bx-spin'></i> Verifying with sheet...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
 
             const urlParams = new URLSearchParams();
@@ -315,33 +332,38 @@
                 let serverMessage = result.trim();
                 
                 if (serverMessage === "Not Found") {
-                    triggerVibration('error');
+                    triggerFeedback('error');
                     showToast("<i class='bx bx-x-circle'></i> Error: Inward Not Found!", "rgba(127, 29, 29, 0.9)", "#f87171", false);
                 } 
                 else if (serverMessage === "Duplicate") {
-                    triggerVibration('error');
+                    triggerFeedback('error');
                     showToast("<i class='bx bx-error'></i> Error: Already Inwarded!", "rgba(120, 53, 15, 0.9)", "#fbbf24", false);
                 } 
                 else if (serverMessage === "Success") {
-                    triggerVibration('success');
                     showToast("<i class='bx bx-check-circle'></i> " + scanType + " Successful", "rgba(6, 78, 59, 0.9)", "#34d399", false);
                     addToListOnScreen(decodedText, scanType, location, timestamp, isManual);
                 } 
                 else {
-                    triggerVibration('error');
+                    triggerFeedback('error');
                     showToast("<i class='bx bx-error'></i> Unknown Error", "rgba(127, 29, 29, 0.9)", "#f87171", false);
                 }
             })
             .catch(error => {
-                triggerVibration('error');
+                triggerFeedback('error');
                 showToast("<i class='bx bx-wifi-off'></i> Network Error - Couldn't verify", "rgba(127, 29, 29, 0.9)", "#f87171", false);
-            })
-            .finally(() => {
-                setTimeout(() => { isProcessing = false; }, 1000); 
             });
         }
 
-        function onScanSuccess(decodedText, decodedResult) { processBarcode(decodedText, false); }
+        function onScanSuccess(decodedText, decodedResult) { 
+            // The Cooldown lock - prevents scanning the same box 10 times in one second
+            if (scanCooldown) return;
+            scanCooldown = true;
+            
+            processBarcode(decodedText, false); 
+            
+            // Lock the scanner for 2.5 seconds to give the worker time to move the box
+            setTimeout(() => { scanCooldown = false; }, 2500);
+        }
 
         function submitManualEntry() {
             let inputField = document.getElementById("manualBarcode");
@@ -351,7 +373,7 @@
                 inputField.value = ""; 
                 inputField.blur(); 
             } else {
-                triggerVibration('error');
+                triggerFeedback('error');
                 showToast("<i class='bx bx-x-circle'></i> Type a barcode first", "rgba(127, 29, 29, 0.9)", "#f87171");
             }
         }
