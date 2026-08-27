@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Warehouse Scanner V10</title>
+    <title>Warehouse Scanner V11</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -116,7 +116,7 @@
         <div class="app-header">
             <div class="header-title">
                 <i class='bx bx-qr-scan'></i>
-                <h2>Scanner V10</h2>
+                <h2>Scanner V11</h2>
             </div>
             <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Full Screen">
                 <i class='bx bx-fullscreen'></i>
@@ -191,14 +191,49 @@
         let scannedItems = [];
         let toastTimeout;
         let scanCooldown = false; 
+        let isProcessing = false;
         
-        // Audio Setup & Unlocker
-        let beepSound = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
-        document.body.addEventListener('touchstart', function() {
-            if (beepSound.readyState === 0) {
-                beepSound.play().then(() => { beepSound.pause(); beepSound.currentTime = 0; }).catch(() => {});
+        // --- ADVANCED AUDIO SYNTHESIZER (Bypasses iOS strict rules) ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-        }, { once: true });
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+        
+        // Unlock audio engine on first screen tap
+        document.addEventListener('touchstart', initAudio, { once: true });
+        document.addEventListener('click', initAudio, { once: true });
+
+        function playBeep(isSuccess) {
+            try {
+                if (!audioCtx) initAudio();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                if (isSuccess) {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // High clear beep
+                    gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.15);
+                } else {
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(250, audioCtx.currentTime); // Low error buzz
+                    gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch(e) { console.log("Audio disabled or failed", e); }
+        }
+        // ---------------------------------------------------------------
         
         document.getElementById("manualBarcode").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
@@ -216,19 +251,17 @@
         }
 
         function triggerFeedback(type) {
-            // Visual Flash
             let flash = document.getElementById("flash-overlay");
             flash.className = type === 'success' ? 'flash-success' : 'flash-error';
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 200);
 
-            // Audio & Vibration
             if (type === 'success') {
                 if (navigator.vibrate) navigator.vibrate(100);
-                beepSound.currentTime = 0;
-                beepSound.play().catch(()=>{});
+                playBeep(true);
             } else {
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+                playBeep(false);
             }
         }
 
@@ -303,6 +336,8 @@
         }
 
         function processBarcode(decodedText, isManual = false) {
+            if (isProcessing) return;
+            
             let scanType = document.querySelector('input[name="scanType"]:checked').value;
             let location = document.getElementById("warehouse").value;
             let timestamp = new Date().toLocaleString();
@@ -313,8 +348,7 @@
                 return;
             }
 
-            // Provide immediate UI feedback that a code was caught
-            triggerFeedback('success');
+            isProcessing = true;
             showToast("<i class='bx bx-loader-alt bx-spin'></i> Verifying with sheet...", "rgba(15, 23, 42, 0.9)", "#38bdf8", true);
 
             const urlParams = new URLSearchParams();
@@ -340,6 +374,7 @@
                     showToast("<i class='bx bx-error'></i> Error: Already Inwarded!", "rgba(120, 53, 15, 0.9)", "#fbbf24", false);
                 } 
                 else if (serverMessage === "Success") {
+                    triggerFeedback('success');
                     showToast("<i class='bx bx-check-circle'></i> " + scanType + " Successful", "rgba(6, 78, 59, 0.9)", "#34d399", false);
                     addToListOnScreen(decodedText, scanType, location, timestamp, isManual);
                 } 
@@ -350,18 +385,19 @@
             })
             .catch(error => {
                 triggerFeedback('error');
-                showToast("<i class='bx bx-wifi-off'></i> Network Error - Couldn't verify", "rgba(127, 29, 29, 0.9)", "#f87171", false);
+                showToast("<i class='bx bx-wifi-off'></i> Network Error", "rgba(127, 29, 29, 0.9)", "#f87171", false);
+            })
+            .finally(() => {
+                setTimeout(() => { isProcessing = false; }, 1000);
             });
         }
 
         function onScanSuccess(decodedText, decodedResult) { 
-            // The Cooldown lock - prevents scanning the same box 10 times in one second
             if (scanCooldown) return;
             scanCooldown = true;
             
             processBarcode(decodedText, false); 
             
-            // Lock the scanner for 2.5 seconds to give the worker time to move the box
             setTimeout(() => { scanCooldown = false; }, 2500);
         }
 
